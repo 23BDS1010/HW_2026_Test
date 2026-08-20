@@ -15,6 +15,7 @@ public class ScoreManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
@@ -22,8 +23,11 @@ public class ScoreManager : MonoBehaviour
     public void AddPoint()
     {
         CurrentScore++;
+
         Debug.Log($"[Score] +1 -> Total: {CurrentScore}");
+
         OnScoreChanged?.Invoke(CurrentScore);
+
     }
 
     public void ResetScore()

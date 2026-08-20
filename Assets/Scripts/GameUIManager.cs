@@ -4,6 +4,7 @@ using TMPro;
 public class GameUIManager : MonoBehaviour
 {
     public GameObject startPanel;
+    public GameObject gamePanel;
     public GameObject gameOverPanel;
     public TextMeshProUGUI finalScoreText;
 
@@ -27,6 +28,7 @@ public class GameUIManager : MonoBehaviour
     private void HandleStateChanged(GameState state)
     {
         startPanel.SetActive(state == GameState.StartMenu);
+        gamePanel.SetActive(state == GameState.Playing);
         gameOverPanel.SetActive(state == GameState.GameOver);
 
         if (state == GameState.GameOver && ScoreManager.Instance != null)

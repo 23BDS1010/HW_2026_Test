@@ -7,9 +7,9 @@ public class DoofusController : MonoBehaviour
     private float fallYThreshold = -10f;
 
     [Header("Dash Settings")]
-    [SerializeField] private float dashMultiplier = 2f;
-    [SerializeField] private float dashDuration = 0.5f;
-    [SerializeField] private float dashCooldown = 4f;
+    [SerializeField] private float dashMultiplier = 2.3f;
+    [SerializeField] private float dashDuration = 1f;
+    [SerializeField] private float dashCooldown = 3f;
 
     private bool isDashing = false;
     private float dashTimer = 0f;
