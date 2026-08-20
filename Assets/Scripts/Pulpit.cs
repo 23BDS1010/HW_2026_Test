@@ -35,7 +35,6 @@ public class Pulpit : MonoBehaviour
         {
             Debug.Log($"[LIFETIME EXPIRED] id={GetInstanceID()} time={Time.time:F2}");
 
-            // Safety net: if early warning never fired for some reason, still trigger next
             if (!hasWarnedSpawn)
             {
                 hasWarnedSpawn = true;
