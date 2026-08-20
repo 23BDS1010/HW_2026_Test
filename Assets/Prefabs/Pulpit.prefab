@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2331466755848692749}
   - component: {fileID: 7918725353011444115}
   - component: {fileID: 2613843696361208439}
+  - component: {fileID: 7151069756075696301}
   m_Layer: 0
   m_Name: Pulpit
   m_TagString: Untagged
@@ -125,3 +126,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cff8f6f7aee82c241bd9925ed59f5097, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pulpit
+  fadeDuration: 1
+--- !u!54 &7151069756075696301
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167973861434816422}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 1

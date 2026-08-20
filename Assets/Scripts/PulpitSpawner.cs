@@ -9,6 +9,7 @@ public class PulpitSpawner : MonoBehaviour
 
     private List<GameObject> activePulpits = new List<GameObject>();
     private Vector3 latestPulpitPosition = Vector3.zero;
+    private Vector3 lastDirection = Vector3.zero;
 
     private Color[] palette = new Color[] { Color.green, Color.cyan, Color.magenta, Color.white };
     private Color lastUsedColor = Color.green;
@@ -65,11 +66,31 @@ public class PulpitSpawner : MonoBehaviour
     private void HandlePulpitDestroyed(Pulpit destroyedPulpit)
     {
         activePulpits.Remove(destroyedPulpit.gameObject);
+
         Debug.Log($"[Spawner] Pulpit removed. Active count now: {activePulpits.Count}");
+
         TrySpawnNext();
     }
 
-    private void TrySpawnNext()
+    [SerializeField] private float platformSpeedMultiplier = 1f;
+
+    public void MovePulpitsTowardPlayer(Transform player, Vector3 playerMovement)
+    {
+        Vector3 scaledMovement = playerMovement * platformSpeedMultiplier;
+
+        foreach (var pulpit in activePulpits)
+        {
+            if (pulpit != null)
+            {
+                var pulpitScript = pulpit.GetComponent<Pulpit>();
+                pulpitScript?.MoveBy(scaledMovement);
+            }
+        }
+
+        latestPulpitPosition -= scaledMovement;
+    }
+
+   private void TrySpawnNext()
     {
         if (activePulpits.Count >= 2)
         {
@@ -103,7 +124,19 @@ public class PulpitSpawner : MonoBehaviour
             validDirections = allDirections.ToList();
         }
 
-        Vector3 chosenOffset = validDirections[Random.Range(0, validDirections.Count)];
+        // Prefer continuing in the same direction as last time, if still valid
+        Vector3 chosenOffset;
+        if (lastDirection != Vector3.zero && validDirections.Contains(lastDirection))
+        {
+            chosenOffset = lastDirection;
+        }
+        else
+        {
+            chosenOffset = validDirections[Random.Range(0, validDirections.Count)];
+        }
+
+        lastDirection = chosenOffset; // remember for next time
+
         Vector3 newPosition = latestPulpitPosition + chosenOffset;
 
         SpawnPulpit(newPosition);

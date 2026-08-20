@@ -15,13 +15,15 @@ public class Pulpit : MonoBehaviour
 
     private Renderer rend;
     private Collider col;
+    private Rigidbody rb; // ← added
     private Color originalColor;
-    public float fadeDuration = 1.5f;
+    public float fadeDuration = 1.8f;
 
     private void Awake()
     {
         rend = GetComponent<Renderer>();
         col = GetComponent<Collider>();
+        rb = GetComponent<Rigidbody>();
 
         if (rend == null)
         {
@@ -36,13 +38,22 @@ public class Pulpit : MonoBehaviour
         {
             Debug.LogWarning($"[Pulpit] No Collider found on {gameObject.name}.");
         }
+
+        if (rb == null) // ← added
+        {
+            Debug.LogWarning($"[Pulpit] No Rigidbody found on {gameObject.name}. Movement will fall back to transform.");
+        }
     }
 
     public void Initialize(float minLife, float maxLife, float spawnAheadTime)
     {
         lifetime = Random.Range(minLife, maxLife);
-        timer = 0f;
+        timer = 0f;                 // Must reset
+        hasWarnedSpawn = false;
+        fadeStarted = false;
+        hasBeenScored = false;
         spawnAheadThreshold = Mathf.Clamp(spawnAheadTime, 0f, lifetime);
+        Debug.Log($"Pulpit lifetime = {lifetime:F2}");
     }
 
     public void SetColor(Color color)
@@ -51,6 +62,19 @@ public class Pulpit : MonoBehaviour
         {
             rend.material.color = color;
             originalColor = color;
+        }
+    }
+
+    // ← added: proper kinematic movement so collisions register correctly
+    public void MoveBy(Vector3 delta)
+    {
+        if (rb != null)
+        {
+            rb.MovePosition(rb.position - delta);
+        }
+        else
+        {
+            transform.position -= delta;
         }
     }
 
