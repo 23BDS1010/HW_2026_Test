@@ -51,7 +51,15 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene(
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        StartCoroutine(ReloadAndStart());
+    }
+
+    private System.Collections.IEnumerator ReloadAndStart()
+    {
+        var sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        var loadOp = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
+        yield return loadOp;
+
+        StartGame(); // resets score + sets state to Playing, which now reaches the fresh UI correctly
     }
 }
