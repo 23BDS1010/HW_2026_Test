@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
-    public Transform target;      // Drag Doofus here in Inspector
-    public Vector3 offset = new Vector3(0f, 8f, -8f);
-    public float smoothSpeed = 5f;
+    public Transform target;
+    public Vector3 offset = new Vector3(0f, 15f, -15f);
+    public float smoothSpeed = 8f; // slightly higher = tighter follow, less distance variation
 
     private void LateUpdate()
     {

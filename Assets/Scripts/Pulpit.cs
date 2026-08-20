@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Pulpit : MonoBehaviour
 {
@@ -6,17 +7,27 @@ public class Pulpit : MonoBehaviour
     private float timer;
     private bool hasWarnedSpawn = false;
     private float spawnAheadThreshold;
+    private bool fadeStarted = false;
 
     public System.Action OnShouldSpawnNext;
     public System.Action<Pulpit> OnDestroyed;
-    public bool IsDestroyed { get; private set; } = false;
+
+    private Renderer rend;
+    private Color originalColor;
+    public float fadeDuration = 0.4f;
+
+    private void Awake()
+    {
+        rend = GetComponent<Renderer>();
+        originalColor = rend.material.color;
+        // Fully visible immediately - matches JSON spawn timing exactly, no invisible period
+    }
 
     public void Initialize(float minLife, float maxLife, float spawnAheadTime)
     {
         lifetime = Random.Range(minLife, maxLife);
         timer = 0f;
         spawnAheadThreshold = Mathf.Clamp(spawnAheadTime, 0f, lifetime);
-        Debug.Log($"[Pulpit Init] Lifetime: {lifetime:F2}, SpawnThreshold: {spawnAheadThreshold:F2}, id={GetInstanceID()}");
     }
 
     private void Update()
@@ -26,24 +37,38 @@ public class Pulpit : MonoBehaviour
 
         if (!hasWarnedSpawn && remaining <= spawnAheadThreshold)
         {
-            Debug.Log($"[EARLY WARNING] id={GetInstanceID()} remaining={remaining:F2} time={Time.time:F2}");
             hasWarnedSpawn = true;
             OnShouldSpawnNext?.Invoke();
         }
 
+        if (!fadeStarted && remaining <= fadeDuration && remaining > 0f)
+        {
+            fadeStarted = true;
+            StartCoroutine(FadeOut(remaining));
+        }
+
         if (timer >= lifetime)
         {
-            Debug.Log($"[LIFETIME EXPIRED] id={GetInstanceID()} time={Time.time:F2}");
-
-            if (!hasWarnedSpawn)
-            {
-                hasWarnedSpawn = true;
-                OnShouldSpawnNext?.Invoke();
-            }
-
-            IsDestroyed = true;
             OnDestroyed?.Invoke(this);
             Destroy(gameObject);
+        }
+    }
+
+    private IEnumerator FadeOut(float remainingAtStart)
+    {
+        float t = 0f;
+        float duration = Mathf.Min(fadeDuration, remainingAtStart);
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float progress = Mathf.Clamp01(t / duration);
+
+            Color c = originalColor;
+            c.a = 1f - progress;
+            rend.material.color = c;
+
+            yield return null;
         }
     }
 }

@@ -1,160 +1,81 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 public class PulpitSpawner : MonoBehaviour
 {
-    [SerializeField] private GameObject pulpitPrefab;
-    [SerializeField] private Transform initialSpawnPoint;
-    [SerializeField] private float pulpitY = 0.5f;
+    public GameObject pulpitPrefab;
+    public float pulpitSize = 9f;
 
-    private float adjacentDistance; // computed automatically from prefab size
-
-    private float minLife;
-    private float maxLife;
-    private float spawnAheadTime;
-
-    private List<Pulpit> activePulpits = new List<Pulpit>();
-    private Vector3 lastSpawnPosition;
+    private List<GameObject> activePulpits = new List<GameObject>();
+    private Vector3 latestPulpitPosition = Vector3.zero;
 
     private void Start()
     {
-        LoadConfigValues();
-
-        if (!ValidateSetup())
-            return;
-
-        ComputeAdjacentDistance();
-
-        lastSpawnPosition = initialSpawnPoint.position;
-        SpawnPulpit(lastSpawnPosition);
-    }
-
-    private void LoadConfigValues()
-    {
-        if (ConfigLoader.Instance == null || ConfigLoader.Instance.Config == null)
-        {
-            Debug.LogError("[PulpitSpawner] ConfigLoader.Instance or Config is null! Using fallback values.");
-            minLife = 4f;
-            maxLife = 5f;
-            spawnAheadTime = 2.5f;
-            return;
-        }
-
-        PulpitData data = ConfigLoader.Instance.Config.pulpit_data;
-        minLife = data.min_pulpit_destroy_time;
-        maxLife = data.max_pulpit_destroy_time;
-        spawnAheadTime = data.pulpit_spawn_time;
-
-        Debug.Log($"[PulpitSpawner] Config loaded — minLife={minLife}, maxLife={maxLife}, spawnAheadTime={spawnAheadTime}");
-    }
-
-    private bool ValidateSetup()
-    {
-        if (pulpitPrefab == null)
-        {
-            Debug.LogError("[PulpitSpawner] Pulpit Prefab is not assigned in the Inspector.");
-            return false;
-        }
-
-        if (initialSpawnPoint == null)
-        {
-            Debug.LogError("[PulpitSpawner] Initial Spawn Point is not assigned in the Inspector.");
-            return false;
-        }
-
-        return true;
-    }
-
-    private void ComputeAdjacentDistance()
-    {
-        Renderer renderer = pulpitPrefab.GetComponentInChildren<Renderer>();
-        if (renderer != null)
-        {
-            Vector3 size = renderer.bounds.size;
-            adjacentDistance = Mathf.Max(size.x, size.z);
-            Debug.Log($"[PulpitSpawner] Computed adjacentDistance from prefab bounds: {adjacentDistance}");
-        }
-        else
-        {
-            Debug.LogWarning("[PulpitSpawner] No Renderer found on Pulpit Prefab. Falling back to distance = 5.");
-            adjacentDistance = 5f;
-        }
-    }
-
-    private Vector3 GetNextAdjacentPosition(Vector3 fromPosition)
-    {
-        Vector3[] directions = new Vector3[]
-        {
-            Vector3.forward,  // +Z
-            Vector3.back,     // -Z
-            Vector3.right,    // +X
-            Vector3.left      // -X
-        };
-
-        Vector3 chosenDirection = directions[Random.Range(0, directions.Length)];
-        Vector3 offset = chosenDirection * adjacentDistance;
-
-        Vector3 next = fromPosition + offset;
-        next.y = pulpitY;
-        return next;
+        SpawnPulpit(Vector3.zero);
     }
 
     private void SpawnPulpit(Vector3 position)
     {
+        GameObject newPulpitObj = Instantiate(pulpitPrefab, position, Quaternion.identity);
+        Pulpit pulpitScript = newPulpitObj.GetComponent<Pulpit>();
+
+        var config = ConfigLoader.Instance.Config.pulpit_data;
+        pulpitScript.Initialize(config.min_pulpit_destroy_time, config.max_pulpit_destroy_time, config.pulpit_spawn_time);
+
+        pulpitScript.OnShouldSpawnNext += TrySpawnNext;
+        pulpitScript.OnDestroyed += HandlePulpitDestroyed;
+
+        activePulpits.Add(newPulpitObj);
+        latestPulpitPosition = position;
+
+        Debug.Log($"[Spawner] Spawned at {position}. Active count: {activePulpits.Count}");
+    }
+
+    private void HandlePulpitDestroyed(Pulpit destroyedPulpit)
+    {
+        activePulpits.Remove(destroyedPulpit.gameObject);
+        Debug.Log($"[Spawner] Pulpit removed. Active count now: {activePulpits.Count}");
+        TrySpawnNext();
+    }
+
+    private void TrySpawnNext()
+    {
         if (activePulpits.Count >= 2)
         {
-            Debug.Log($"[SPAWN BLOCKED] active count={activePulpits.Count}");
+            Debug.Log("[Spawner] Skipped - already 2 active.");
             return;
         }
 
-        GameObject go = Instantiate(pulpitPrefab, position, Quaternion.identity);
-        Pulpit pulpit = go.GetComponent<Pulpit>();
-
-        if (pulpit == null)
+        Vector3[] allDirections = new Vector3[]
         {
-            Debug.LogError("[PulpitSpawner] Pulpit Prefab has no Pulpit component attached.");
-            Destroy(go);
-            return;
+            new Vector3(pulpitSize, 0, 0),
+            new Vector3(-pulpitSize, 0, 0),
+            new Vector3(0, 0, pulpitSize),
+            new Vector3(0, 0, -pulpitSize)
+        };
+
+        List<Vector3> validDirections = new List<Vector3>();
+        foreach (var dir in allDirections)
+        {
+            Vector3 candidatePosition = latestPulpitPosition + dir;
+            bool overlaps = activePulpits.Any(p =>
+                p != null && Vector3.Distance(p.transform.position, candidatePosition) < 0.5f);
+
+            if (!overlaps)
+            {
+                validDirections.Add(dir);
+            }
         }
 
-        pulpit.Initialize(minLife, maxLife, spawnAheadTime);
-
-        pulpit.OnShouldSpawnNext += () => SpawnNextAdjacentTo(position);
-        pulpit.OnDestroyed += HandlePulpitDestroyed;
-
-        activePulpits.Add(pulpit);
-        lastSpawnPosition = position;
-        Debug.Log($"[SPAWNED] id={pulpit.GetInstanceID()} pos={position} active count={activePulpits.Count} time={Time.time:F2}");
-    }
-
-    private void SpawnNextAdjacentTo(Vector3 previousPosition)
-    {
-        Vector3 nextPos = GetNextAdjacentPosition(previousPosition);
-        SpawnPulpit(nextPos);
-    }
-
-    private void HandlePulpitDestroyed(Pulpit pulpit)
-    {
-        activePulpits.Remove(pulpit);
-        pulpit.OnDestroyed -= HandlePulpitDestroyed;
-        Debug.Log($"[REMOVED] id={pulpit.GetInstanceID()} active count={activePulpits.Count} time={Time.time:F2}");
-
-        if (activePulpits.Count < 2)
+        if (validDirections.Count == 0)
         {
-            Vector3 referencePosition;
-
-            if (activePulpits.Count > 0)
-            {
-                // Spawn next to whichever pulpit is still alive
-                referencePosition = activePulpits[activePulpits.Count - 1].transform.position;
-            }
-            else
-            {
-                // No pulpits left at all — fall back to last known position
-                referencePosition = lastSpawnPosition;
-            }
-
-            SpawnNextAdjacentTo(referencePosition);
+            validDirections = allDirections.ToList();
         }
+
+        Vector3 chosenOffset = validDirections[Random.Range(0, validDirections.Count)];
+        Vector3 newPosition = latestPulpitPosition + chosenOffset;
+
+        SpawnPulpit(newPosition);
     }
 }

@@ -1,0 +1,31 @@
+# Doofus Adventure Game
+
+A 3D Unity game built for the Hitwicket Game Developer assignment (HW_2026_Test).
+
+## How to Run
+1. Open the project folder in Unity Hub (Unity 6.3 LTS or later).
+2. Open `SampleScene`.
+3. Press Play.
+4. Use WASD or Arrow Keys to move Doofus.
+
+## Level Completion Status
+
+### ✅ Level 1 — Character Movement and Platform Placement (Complete)
+- Doofus moves via WASD/Arrow keys, with speed read directly from `DoofusDiary.json` (`player_data.speed`).
+- Pulpits spawn dynamically using JSON values:
+  - `min_pulpit_destroy_time` / `max_pulpit_destroy_time` — randomized lifetime per Pulpit
+  - `pulpit_spawn_time` — remaining-time threshold that triggers the next Pulpit's spawn
+- Only 2 Pulpits exist simultaneously at any time.
+- New Pulpits spawn adjacent (9 units, matching platform size) to the most recent Pulpit, never overlapping an active one.
+- Doofus falls if not standing on a Pulpit when it's destroyed, or if walked off an edge.
+
+**Note on difficulty:** Speed (3) and spawn timing (2.5s) are used exactly as given in the JSON, with true 9-unit adjacency — creating a tight, skill-based timing window, consistent with the "reach 50 Pulpits" challenge framing.
+
+### ⬜ Level 2 — Scoring (In Progress)
+### ⬜ Level 3 — Start/Game Over Screens (Not Started)
+
+## Controls
+- WASD or Arrow Keys — move Doofus
+
+## Known Limitations
+- (fill in anything you know is rough/unfinished, e.g. "camera framing could be improved")
