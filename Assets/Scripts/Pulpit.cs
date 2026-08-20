@@ -8,19 +8,19 @@ public class Pulpit : MonoBehaviour
     private bool hasWarnedSpawn = false;
     private float spawnAheadThreshold;
     private bool fadeStarted = false;
+    private bool hasBeenScored = false;
 
     public System.Action OnShouldSpawnNext;
     public System.Action<Pulpit> OnDestroyed;
 
     private Renderer rend;
     private Color originalColor;
-    public float fadeDuration = 0.4f;
+    public float fadeDuration = 1.3f;
 
     private void Awake()
     {
         rend = GetComponent<Renderer>();
         originalColor = rend.material.color;
-        // Fully visible immediately - matches JSON spawn timing exactly, no invisible period
     }
 
     public void Initialize(float minLife, float maxLife, float spawnAheadTime)
@@ -69,6 +69,18 @@ public class Pulpit : MonoBehaviour
             rend.material.color = c;
 
             yield return null;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (hasBeenScored) return;
+
+        if (collision.gameObject.CompareTag("Doofus"))
+        {
+            hasBeenScored = true;
+            ScoreManager.Instance?.AddPoint();
+            Debug.Log($"[Pulpit] Doofus landed - scored! id={GetInstanceID()}");
         }
     }
 }
