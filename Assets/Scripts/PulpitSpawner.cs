@@ -12,7 +12,18 @@ public class PulpitSpawner : MonoBehaviour
 
     private void Start()
     {
-        SpawnPulpit(Vector3.zero);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnStateChanged += HandleGameStateChanged;
+        }
+    }
+
+    private void HandleGameStateChanged(GameState state)
+    {
+        if (state == GameState.Playing && activePulpits.Count == 0)
+        {
+            SpawnPulpit(Vector3.zero);
+        }
     }
 
     private void SpawnPulpit(Vector3 position)
