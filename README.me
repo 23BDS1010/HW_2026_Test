@@ -1,39 +1,152 @@
 # Doofus Adventure Game
 
-A 3D Unity game built for the Hitwicket Game Developer assignment (HW_2026_Test).
+A 3D Unity game developed for the **Hitwicket Game Developer Challenge (HW_2026_Test)**.
+
+---
+
+## About the Project
+
+**Doofus Adventure** is a procedural 3D platform survival game built in Unity for Windows. The objective is to guide Doofus across disappearing floating platforms (Pulpits), survive as long as possible, and achieve the highest score.
+
+The project demonstrates character movement, procedural platform generation, JSON-driven gameplay configuration, scoring, and complete game state management.
+
+---
+
+## Platform
+
+**Windows (Standalone Build)**
+
+---
 
 ## How to Run
-1. Open the project folder in Unity Hub (Unity 6.3 LTS or later).
-2. Open `SampleScene`.
-3. Press Play.
-4. Use WASD or Arrow Keys to move Doofus.
 
-## Design Note: Difficulty
+1. Extract the game folder.
+2. Run **`Doofus Adventure.exe`**.
+3. Click **Play** from the Start Menu.
+4. Use **WASD** or **Arrow Keys** to move Doofus.
+5. Press **Left Shift** to use Dash.
 
-Doofus's speed (3), Pulpit spawn timing (2.5s), and true 9-unit adjacency are used exactly
-as specified in the JSON — untouched. At these values, crossing between Pulpits requires
-precise timing, which is intentional: the brief frames this as a genuine challenge ("walk on
-at least 50 Pulpits"). Rather than loosening the numbers to make it easier, this submission
-respects the spec exactly and lets the difficulty emerge naturally from it.
+---
 
-## Level Completion Status
+## Gameplay
 
-### ✅ Level 1 — Character Movement and Platform Placement (Complete)
-- Doofus moves via WASD/Arrow keys, with speed read directly from `DoofusDiary.json` (`player_data.speed`).
-- Pulpits spawn dynamically using JSON values:
-  - `min_pulpit_destroy_time` / `max_pulpit_destroy_time` — randomized lifetime per Pulpit
-  - `pulpit_spawn_time` — remaining-time threshold that triggers the next Pulpit's spawn
-- Only 2 Pulpits exist simultaneously at any time.
-- New Pulpits spawn adjacent (9 units, matching platform size) to the most recent Pulpit, never overlapping an active one.
-- Doofus falls if not standing on a Pulpit when it's destroyed, or if walked off an edge.
+- Cross continuously spawning floating Pulpits.
+- Each Pulpit disappears after a random duration.
+- Only **2 Pulpits** exist simultaneously.
+- Landing on a new Pulpit increases your score.
+- Falling off a platform or missing the next Pulpit results in **Game Over**.
 
-**Note on difficulty:** Speed (3) and spawn timing (2.5s) are used exactly as given in the JSON, with true 9-unit adjacency — creating a tight, skill-based timing window, consistent with the "reach 50 Pulpits" challenge framing.
+**Objective:** Reach **50 or more Pulpits**.
 
-### ⬜ Level 2 — Scoring (In Progress)
-### ⬜ Level 3 — Start/Game Over Screens (Not Started)
+---
 
 ## Controls
-- WASD or Arrow Keys — move Doofus
 
-## Known Limitations
-- (fill in anything you know is rough/unfinished, e.g. "camera framing could be improved")
+| Key | Action |
+|------|--------|
+| **WASD / Arrow Keys** | Move |
+| **Left Shift** | Dash |
+| **Mouse** | UI Interaction |
+
+---
+
+## Levels Completed
+
+| Level | Status |
+|--------|--------|
+| Level 1 – Character Movement & Platform Placement | ✅ Completed |
+| Level 2 – Scoring System | ✅ Completed |
+| Level 3 – Start Menu & Game Over Screen | ✅ Completed |
+
+---
+
+## Features
+
+### Level 1 – Character Movement & Procedural Platforms
+
+- Player movement using WASD / Arrow Keys
+- Procedural adjacent Pulpit generation
+- Randomized Pulpit lifetime
+- Maximum of 2 active platforms
+- Fall detection and Game Over
+- JSON-driven gameplay configuration
+
+### Level 2 – Scoring
+
+- Score increases for every successful Pulpit transition
+- Live score displayed during gameplay
+- Final score shown on the Game Over screen
+
+### Level 3 – UI & Game States
+
+- Start Menu
+- Play button
+- Game Over screen
+- Restart functionality
+- Complete game state management
+
+---
+
+## Additional Feature: Dash Mechanic
+
+A **Dash** mechanic was added as a gameplay balancing feature after extensive playtesting.
+
+During testing, all possible platform movement combinations were analyzed, and it was observed that players could consistently survive only **15–16 Pulpits** before encountering platform layouts that became extremely difficult to reach within the available time window.
+
+Rather than changing the original gameplay values, Dash provides a short burst of speed that rewards precise timing while preserving the intended challenge.
+
+**Dash**
+
+- **Key:** Left Shift
+- **Duration:** 0.5 seconds
+- **Cooldown:** 4 seconds
+
+---
+
+## Configuration
+
+Core gameplay values are loaded from:
+
+`Assets/Resources/DoofusDiary.json`
+
+| Parameter | Description |
+|-----------|-------------|
+| `player_data.speed` | Base player movement speed |
+| `min_pulpit_destroy_time` | Minimum platform lifetime |
+| `max_pulpit_destroy_time` | Maximum platform lifetime |
+| `pulpit_spawn_time` | Time before the next platform spawns |
+
+---
+
+## Technical Highlights
+
+- Unity 6 (3D)
+- Procedural platform generation
+- JSON-driven configuration
+- Dynamic scoring system
+- Start/Game Over UI
+- Restartable gameplay loop
+- Windows standalone build
+
+---
+
+## Project Structure
+
+```text
+Assets/
+├── Resources/
+│   └── DoofusDiary.json
+├── Scripts/
+├── Prefabs/
+├── Scenes/
+│   └── SampleScene
+└── UI/
+```
+
+---
+
+## Developer
+
+**Suryansh Behal**
+
+Submission for the **Hitwicket Game Developer Challenge 2026**.

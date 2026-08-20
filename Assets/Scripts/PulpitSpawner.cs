@@ -10,6 +10,9 @@ public class PulpitSpawner : MonoBehaviour
     private List<GameObject> activePulpits = new List<GameObject>();
     private Vector3 latestPulpitPosition = Vector3.zero;
 
+    private Color[] palette = new Color[] { Color.green, Color.cyan, Color.magenta, Color.white };
+    private Color lastUsedColor = Color.green;
+
     private void Start()
     {
         if (GameManager.Instance != null)
@@ -39,6 +42,16 @@ public class PulpitSpawner : MonoBehaviour
 
         var config = ConfigLoader.Instance.Config.pulpit_data;
         pulpitScript.Initialize(config.min_pulpit_destroy_time, config.max_pulpit_destroy_time, config.pulpit_spawn_time);
+
+        // Pick a color guaranteed different from the last pulpit's color
+        Color chosenColor;
+        do
+        {
+            chosenColor = palette[Random.Range(0, palette.Length)];
+        } while (chosenColor == lastUsedColor);
+
+        pulpitScript.SetColor(chosenColor);
+        lastUsedColor = chosenColor;
 
         pulpitScript.OnShouldSpawnNext += TrySpawnNext;
         pulpitScript.OnDestroyed += HandlePulpitDestroyed;

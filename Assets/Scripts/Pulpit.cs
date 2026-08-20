@@ -18,14 +18,14 @@ public class Pulpit : MonoBehaviour
     private Color originalColor;
     public float fadeDuration = 1.5f;
 
-   private void Awake()
+    private void Awake()
     {
         rend = GetComponent<Renderer>();
         col = GetComponent<Collider>();
 
         if (rend == null)
         {
-            Debug.LogError($"[Pulpit] No Renderer found on {gameObject.name}. Fade will be skipped.");
+            Debug.LogError($"[Pulpit] No Renderer found on {gameObject.name}. Fade/color will be skipped.");
         }
         else
         {
@@ -43,6 +43,15 @@ public class Pulpit : MonoBehaviour
         lifetime = Random.Range(minLife, maxLife);
         timer = 0f;
         spawnAheadThreshold = Mathf.Clamp(spawnAheadTime, 0f, lifetime);
+    }
+
+    public void SetColor(Color color)
+    {
+        if (rend != null)
+        {
+            rend.material.color = color;
+            originalColor = color;
+        }
     }
 
     private void Update()
@@ -71,9 +80,11 @@ public class Pulpit : MonoBehaviour
 
     private IEnumerator FadeOut(float remainingAtStart)
     {
+        if (rend == null) yield break;
+
         if (col != null)
         {
-            col.enabled = false; // stop blocking Doofus as soon as fade begins
+            col.enabled = false;
         }
 
         float t = 0f;
@@ -84,7 +95,7 @@ public class Pulpit : MonoBehaviour
             t += Time.deltaTime;
             float progress = Mathf.Clamp01(t / duration);
 
-            Color c = originalColor;
+            Color c = rend.material.color;
             c.a = 1f - progress;
             rend.material.color = c;
 
