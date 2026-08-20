@@ -49,8 +49,12 @@ public class GameManager : MonoBehaviour
         SetState(GameState.GameOver);
     }
 
+    private bool isRestarting = false;
+
     public void RestartGame()
     {
+        if (isRestarting) return;
+        isRestarting = true;
         StartCoroutine(ReloadAndStart());
     }
 
@@ -59,7 +63,9 @@ public class GameManager : MonoBehaviour
         var sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         var loadOp = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
         yield return loadOp;
+        yield return null;
 
-        StartGame(); // resets score + sets state to Playing, which now reaches the fresh UI correctly
+        StartGame();
+        isRestarting = false;
     }
 }

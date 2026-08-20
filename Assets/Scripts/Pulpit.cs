@@ -14,13 +14,28 @@ public class Pulpit : MonoBehaviour
     public System.Action<Pulpit> OnDestroyed;
 
     private Renderer rend;
+    private Collider col;
     private Color originalColor;
-    public float fadeDuration = 1.3f;
+    public float fadeDuration = 1.5f;
 
-    private void Awake()
+   private void Awake()
     {
         rend = GetComponent<Renderer>();
-        originalColor = rend.material.color;
+        col = GetComponent<Collider>();
+
+        if (rend == null)
+        {
+            Debug.LogError($"[Pulpit] No Renderer found on {gameObject.name}. Fade will be skipped.");
+        }
+        else
+        {
+            originalColor = rend.material.color;
+        }
+
+        if (col == null)
+        {
+            Debug.LogWarning($"[Pulpit] No Collider found on {gameObject.name}.");
+        }
     }
 
     public void Initialize(float minLife, float maxLife, float spawnAheadTime)
@@ -56,6 +71,11 @@ public class Pulpit : MonoBehaviour
 
     private IEnumerator FadeOut(float remainingAtStart)
     {
+        if (col != null)
+        {
+            col.enabled = false; // stop blocking Doofus as soon as fade begins
+        }
+
         float t = 0f;
         float duration = Mathf.Min(fadeDuration, remainingAtStart);
 

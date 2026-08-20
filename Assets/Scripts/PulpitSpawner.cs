@@ -28,6 +28,12 @@ public class PulpitSpawner : MonoBehaviour
 
     private void SpawnPulpit(Vector3 position)
     {
+        if (ConfigLoader.Instance == null || ConfigLoader.Instance.Config == null)
+        {
+            Debug.LogError("[Spawner] Config not ready — cannot spawn pulpit yet.");
+            return;
+        }
+
         GameObject newPulpitObj = Instantiate(pulpitPrefab, position, Quaternion.identity);
         Pulpit pulpitScript = newPulpitObj.GetComponent<Pulpit>();
 
