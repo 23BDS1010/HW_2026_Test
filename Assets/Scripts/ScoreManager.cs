@@ -35,7 +35,7 @@ public class ScoreManager : MonoBehaviour
 
     public void ResetScore()
     {
-        CurrentScore = 44;
+        CurrentScore = 0;
         OnScoreChanged?.Invoke(CurrentScore);
     }
 }
