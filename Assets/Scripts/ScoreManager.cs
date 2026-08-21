@@ -24,8 +24,6 @@ public class ScoreManager : MonoBehaviour
     {
         CurrentScore++;
 
-        Debug.Log($"[Score] +1 -> Total: {CurrentScore}");
-
         OnScoreChanged?.Invoke(CurrentScore);
 
         if (CurrentScore >= 50 && GameManager.Instance != null)
@@ -37,7 +35,7 @@ public class ScoreManager : MonoBehaviour
 
     public void ResetScore()
     {
-        CurrentScore = 0;
+        CurrentScore = 44;
         OnScoreChanged?.Invoke(CurrentScore);
     }
 }

@@ -1331,7 +1331,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.52961904, g: 0.5739159, b: 0.645283, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -2141,10 +2141,10 @@ RectTransform:
   - {fileID: 647028293}
   m_Father: {fileID: 236083197}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 470, y: 878}
+  m_SizeDelta: {x: 88, y: 640}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1706561360
 MonoBehaviour:
@@ -2159,7 +2159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  m_Color: {r: 0.50637937, g: 0.5698112, b: 0.5692687, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2368,7 +2368,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PulpitSpawner
   pulpitPrefab: {fileID: 1167973861434816422, guid: 802762ef806a2c845b953bdc159fe8e6, type: 3}
   pulpitSize: 9
-  platformSpeedMultiplier: 2
+  platformSpeedMultiplier: 2.5
 --- !u!4 &1736113723
 Transform:
   m_ObjectHideFlags: 0
@@ -2720,10 +2720,10 @@ RectTransform:
   - {fileID: 206306790}
   m_Father: {fileID: 236083197}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 470, y: 878}
+  m_SizeDelta: {x: -662, y: 170}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1999104241
 MonoBehaviour:

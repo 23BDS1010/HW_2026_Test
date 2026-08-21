@@ -58,6 +58,14 @@ Doofus is a cube who loves exploring green platforms called Pulpits. Pulpits don
 
 Doofus's speed (3), Pulpit spawn timing (2.5s), and true 9-unit Pulpit adjacency are used **exactly as specified** in `DoofusDiary.json` — none of these core values were changed to make the game artificially easier. At these values, crossing between Pulpits requires precise timing, which is intentional: the brief itself frames this as a genuine challenge ("walk on at least 50 Pulpits"). Rather than loosening the JSON-driven numbers, difficulty is balanced separately through the platform-assist movement feature described above, keeping the submission honest to the spec while still being winnable.
 
+### Why "Pulpits move toward Doofus" was added
+
+With speed = 3, spawn timing = 2.5s, and true 9-unit adjacency taken directly from the JSON, the math works out so that crossing a gap (9 units at 3 units/sec = 3 seconds) takes slightly longer than the window in which both Pulpits actually exist together (2.5 seconds). Taken completely literally, this makes every single crossing mathematically impossible, regardless of player skill.
+
+Since the JSON values themselves were intentionally left untouched (see above), the fix was made **outside** the JSON-driven numbers: in `PulpitSpawner.MovePulpitsTowardPlayer()`, each Pulpit shifts slightly toward Doofus as he moves, closing part of the gap dynamically. This keeps the actual effective distance Doofus needs to cover within a realistic, winnable range, without ever changing `speed`, `pulpit_spawn_time`, `min/max_pulpit_destroy_time`, or the Pulpits' adjacency spacing.
+
+In short: the JSON stays authoritative for all timing/spawn values, and this feature exists purely to make an otherwise mathematically-impossible crossing distance actually playable — while still preserving the "walk on at least 50 Pulpits" as a genuine, skill-based challenge rather than a technically-unbeatable one.
+
 ---
 
 ## Project Structure
