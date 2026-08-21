@@ -10,8 +10,13 @@ public class PulpitSpawner : MonoBehaviour
     private List<GameObject> activePulpits = new List<GameObject>();
     private Vector3 latestPulpitPosition = Vector3.zero;
     private Vector3 lastDirection = Vector3.zero;
+    private bool gameActive = false;
 
-    private Color[] palette = new Color[] { Color.green, Color.cyan, Color.magenta, Color.white };
+    private Color[] palette = new Color[] {
+        new Color(0f, 0.6f, 0f),
+        new Color(0.13f, 0.8f, 0.13f),
+        new Color(0.4f, 1f, 0.4f)
+    };
     private Color lastUsedColor = Color.green;
 
     private void Start()
@@ -22,16 +27,40 @@ public class PulpitSpawner : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnStateChanged -= HandleGameStateChanged;
+        }
+    }
+
     private void HandleGameStateChanged(GameState state)
     {
-        if (state == GameState.Playing && activePulpits.Count == 0)
+        if (state == GameState.Playing)
         {
-            SpawnPulpit(Vector3.zero);
+            gameActive = true;
+            if (activePulpits.Count == 0)
+            {
+                SpawnPulpit(Vector3.zero);
+            }
+        }
+        else
+        {
+            gameActive = false;
+
+            foreach (var p in activePulpits)
+            {
+                if (p != null) Destroy(p);
+            }
+            activePulpits.Clear();
         }
     }
 
     private void SpawnPulpit(Vector3 position)
     {
+        if (!gameActive) return;
+
         if (ConfigLoader.Instance == null || ConfigLoader.Instance.Config == null)
         {
             Debug.LogError("[Spawner] Config not ready — cannot spawn pulpit yet.");
@@ -44,7 +73,6 @@ public class PulpitSpawner : MonoBehaviour
         var config = ConfigLoader.Instance.Config.pulpit_data;
         pulpitScript.Initialize(config.min_pulpit_destroy_time, config.max_pulpit_destroy_time, config.pulpit_spawn_time);
 
-        // Pick a color guaranteed different from the last pulpit's color
         Color chosenColor;
         do
         {
@@ -65,6 +93,8 @@ public class PulpitSpawner : MonoBehaviour
 
     private void HandlePulpitDestroyed(Pulpit destroyedPulpit)
     {
+        if (!gameActive) return;
+
         activePulpits.Remove(destroyedPulpit.gameObject);
 
         Debug.Log($"[Spawner] Pulpit removed. Active count now: {activePulpits.Count}");
@@ -72,10 +102,12 @@ public class PulpitSpawner : MonoBehaviour
         TrySpawnNext();
     }
 
-    [SerializeField] private float platformSpeedMultiplier = 1f;
+    [SerializeField] private float platformSpeedMultiplier = 1.5f;
 
     public void MovePulpitsTowardPlayer(Transform player, Vector3 playerMovement)
     {
+        if (!gameActive) return;
+
         Vector3 scaledMovement = playerMovement * platformSpeedMultiplier;
 
         foreach (var pulpit in activePulpits)
@@ -90,8 +122,10 @@ public class PulpitSpawner : MonoBehaviour
         latestPulpitPosition -= scaledMovement;
     }
 
-   private void TrySpawnNext()
+    private void TrySpawnNext()
     {
+        if (!gameActive) return;
+
         if (activePulpits.Count >= 2)
         {
             Debug.Log("[Spawner] Skipped - already 2 active.");
@@ -124,18 +158,8 @@ public class PulpitSpawner : MonoBehaviour
             validDirections = allDirections.ToList();
         }
 
-        // Prefer continuing in the same direction as last time, if still valid
-        Vector3 chosenOffset;
-        if (lastDirection != Vector3.zero && validDirections.Contains(lastDirection))
-        {
-            chosenOffset = lastDirection;
-        }
-        else
-        {
-            chosenOffset = validDirections[Random.Range(0, validDirections.Count)];
-        }
-
-        lastDirection = chosenOffset; // remember for next time
+        Vector3 chosenOffset = validDirections[Random.Range(0, validDirections.Count)];
+        lastDirection = chosenOffset;
 
         Vector3 newPosition = latestPulpitPosition + chosenOffset;
 

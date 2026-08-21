@@ -6,7 +6,9 @@ public class GameUIManager : MonoBehaviour
     public GameObject startPanel;
     public GameObject gamePanel;
     public GameObject gameOverPanel;
+    public GameObject winPanel;
     public TextMeshProUGUI finalScoreText;
+    public TextMeshProUGUI winScoreText;
 
     private void Start()
     {
@@ -30,10 +32,15 @@ public class GameUIManager : MonoBehaviour
         startPanel.SetActive(state == GameState.StartMenu);
         gamePanel.SetActive(state == GameState.Playing);
         gameOverPanel.SetActive(state == GameState.GameOver);
+        winPanel.SetActive(state == GameState.Won);
 
         if (state == GameState.GameOver && ScoreManager.Instance != null)
         {
             finalScoreText.text = $"Final Score: {ScoreManager.Instance.CurrentScore}";
+        }
+        if (state == GameState.Won && ScoreManager.Instance != null)
+        {
+            winScoreText.text = $"You Won! Final Score: {ScoreManager.Instance.CurrentScore}";
         }
     }
 

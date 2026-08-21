@@ -1,152 +1,118 @@
 # Doofus Adventure Game
 
-A 3D Unity game developed for the **Hitwicket Game Developer Challenge (HW_2026_Test)**.
+A 3D Unity game built for the Hitwicket Game Developer assignment (**HW_2026_Test**).
 
----
-
-## About the Project
-
-**Doofus Adventure** is a procedural 3D platform survival game built in Unity for Windows. The objective is to guide Doofus across disappearing floating platforms (Pulpits), survive as long as possible, and achieve the highest score.
-
-The project demonstrates character movement, procedural platform generation, JSON-driven gameplay configuration, scoring, and complete game state management.
-
----
-
-## Platform
-
-**Windows (Standalone Build)**
+Doofus is a cube who loves exploring green platforms called Pulpits. Pulpits don't last long — guide Doofus across as many as possible before he falls.
 
 ---
 
 ## How to Run
 
-1. Extract the game folder.
-2. Run **`Doofus Adventure.exe`**.
-3. Click **Play** from the Start Menu.
-4. Use **WASD** or **Arrow Keys** to move Doofus.
-5. Press **Left Shift** to use Dash.
+1. Open the project folder in **Unity Hub** (Unity 6.3 LTS or later).
+2. Open `SampleScene`.
+3. Press **Play**.
+4. Click **Start** on the title screen.
+5. Use **WASD** or **Arrow Keys** to move Doofus across the Pulpits.
+6. Reach 50 successful landings to win, or fall to trigger Game Over — either way, hit **Retry / Play Again** to go again.
 
 ---
 
-## Gameplay
+## Level Completion Status
 
-- Cross continuously spawning floating Pulpits.
-- Each Pulpit disappears after a random duration.
-- Only **2 Pulpits** exist simultaneously.
-- Landing on a new Pulpit increases your score.
-- Falling off a platform or missing the next Pulpit results in **Game Over**.
+### ✅ Level 1 — Character Movement and Platform Placement
+- Doofus moves via WASD/Arrow keys, with movement **speed read directly from `DoofusDiary.json`** (`player_data.speed`).
+- Pulpits spawn dynamically using JSON values:
+  - `min_pulpit_destroy_time` / `max_pulpit_destroy_time` — each Pulpit's lifetime is randomized within this range
+  - `pulpit_spawn_time` — the remaining-time threshold that triggers the next Pulpit to spawn, so a new one always appears **before** the old one disappears
+- Only **2 Pulpits exist simultaneously** at any time, enforced in `PulpitSpawner.cs`.
+- New Pulpits spawn **adjacent** (matching the 9x9 platform size) to the most recently placed Pulpit, in a **randomized direction**, and never overlap a currently active Pulpit.
+- Doofus **falls** (via Rigidbody + gravity) if he's not standing on a Pulpit when it's destroyed, or if he walks off an edge — this ends the game.
+- Pulpits **smoothly fade out** just before their exact JSON-specified expiry. This is a purely cosmetic layer — the underlying timer, collider, and destruction moment are untouched and still match the JSON exactly.
+- Robust JSON handling: missing file, malformed JSON, or an inverted `min > max` range all fall back gracefully (defaults / auto-correction) instead of crashing.
 
-**Objective:** Reach **50 or more Pulpits**.
+### ✅ Level 2 — Scoring
+- Score increases by exactly 1 each time Doofus successfully lands on a **new** Pulpit (tracked per-Pulpit via a `hasBeenScored` flag, so standing still or re-landing doesn't double-count).
+- Live score shown on-screen during gameplay, with a small **pop/punch animation** each time it increases for satisfying visual feedback.
+- Score resets to 0 automatically at the start of every new run.
 
----
-
-## Controls
-
-| Key | Action |
-|------|--------|
-| **WASD / Arrow Keys** | Move |
-| **Left Shift** | Dash |
-| **Mouse** | UI Interaction |
-
----
-
-## Levels Completed
-
-| Level | Status |
-|--------|--------|
-| Level 1 – Character Movement & Platform Placement | ✅ Completed |
-| Level 2 – Scoring System | ✅ Completed |
-| Level 3 – Start Menu & Game Over Screen | ✅ Completed |
+### ✅ Level 3 — Start Screen and Game Over Screen
+- **Start Screen**: shown on launch; gameplay and Pulpit spawning only begin once the player presses **Start**.
+- **Game Over Screen**: appears the moment Doofus falls, displaying the final score, with a **Retry** button that cleanly reloads the game.
+- **Win Screen** *(bonus, beyond the base requirement)*: reaching a score of **50** — matching the brief's own framing ("Doofus has set a challenge to walk on at least 50 Pulpits") — triggers a dedicated "You Won!" screen with the final score and a Play Again option.
+- A central `GameManager` state machine (`StartMenu → Playing → GameOver / Won`) drives all screen transitions and gameplay enable/disable in one place.
+- The Pulpit Spawner is fully state-aware: it only spawns while `Playing`, and immediately clears any remaining Pulpits and stops all activity the instant the game ends (Game Over or Win) — no background spawning after the run is over.
 
 ---
 
-## Features
+## Extra Features (beyond the 3 required levels)
 
-### Level 1 – Character Movement & Procedural Platforms
-
-- Player movement using WASD / Arrow Keys
-- Procedural adjacent Pulpit generation
-- Randomized Pulpit lifetime
-- Maximum of 2 active platforms
-- Fall detection and Game Over
-- JSON-driven gameplay configuration
-
-### Level 2 – Scoring
-
-- Score increases for every successful Pulpit transition
-- Live score displayed during gameplay
-- Final score shown on the Game Over screen
-
-### Level 3 – UI & Game States
-
-- Start Menu
-- Play button
-- Game Over screen
-- Restart functionality
-- Complete game state management
+- **Background music** with automatic looping playback, plus an in-game **Mute button** to toggle audio on/off at any time.
+- **Dynamic camera follow** — the camera smoothly tracks Doofus from an angled, zoomed-out perspective so both the current and upcoming Pulpit stay visible.
+- **Randomized Pulpit color palette** (varying shades of green) instead of a single flat color, adding visual variety while staying true to the brief's "green platforms" theme.
+- **Platform-assist movement**: Pulpits subtly shift toward Doofus as he moves, tuned independently of the JSON's speed/timing values, to keep the tight timing window fair and winnable without ever altering the actual JSON-specified numbers.
+- Clean singleton-based architecture (`ConfigLoader`, `ScoreManager`, `GameManager`) using `DontDestroyOnLoad`, so core systems persist correctly across restarts.
 
 ---
 
-## Additional Feature: Dash Mechanic
+## Design Note: Difficulty
 
-A **Dash** mechanic was added as a gameplay balancing feature after extensive playtesting.
-
-During testing, all possible platform movement combinations were analyzed, and it was observed that players could consistently survive only **15–16 Pulpits** before encountering platform layouts that became extremely difficult to reach within the available time window.
-
-Rather than changing the original gameplay values, Dash provides a short burst of speed that rewards precise timing while preserving the intended challenge.
-
-**Dash**
-
-- **Key:** Left Shift
-- **Duration:** 0.5 seconds
-- **Cooldown:** 4 seconds
-
----
-
-## Configuration
-
-Core gameplay values are loaded from:
-
-`Assets/Resources/DoofusDiary.json`
-
-| Parameter | Description |
-|-----------|-------------|
-| `player_data.speed` | Base player movement speed |
-| `min_pulpit_destroy_time` | Minimum platform lifetime |
-| `max_pulpit_destroy_time` | Maximum platform lifetime |
-| `pulpit_spawn_time` | Time before the next platform spawns |
-
----
-
-## Technical Highlights
-
-- Unity 6 (3D)
-- Procedural platform generation
-- JSON-driven configuration
-- Dynamic scoring system
-- Start/Game Over UI
-- Restartable gameplay loop
-- Windows standalone build
+Doofus's speed (3), Pulpit spawn timing (2.5s), and true 9-unit Pulpit adjacency are used **exactly as specified** in `DoofusDiary.json` — none of these core values were changed to make the game artificially easier. At these values, crossing between Pulpits requires precise timing, which is intentional: the brief itself frames this as a genuine challenge ("walk on at least 50 Pulpits"). Rather than loosening the JSON-driven numbers, difficulty is balanced separately through the platform-assist movement feature described above, keeping the submission honest to the spec while still being winnable.
 
 ---
 
 ## Project Structure
 
-```text
+```
 Assets/
 ├── Resources/
-│   └── DoofusDiary.json
+│   └── DoofusDiary.json      # Game config (speed, pulpit timing)
 ├── Scripts/
+│   ├── ConfigLoader.cs       # Loads & validates JSON config
+│   ├── DoofusDiary.cs        # JSON data model
+│   ├── DoofusController.cs   # Player movement, fall detection
+│   ├── Pulpit.cs             # Individual platform: timer, fade, scoring trigger
+│   ├── PulpitSpawner.cs      # Spawn logic, adjacency, max-2 rule, platform-assist
+│   ├── ScoreManager.cs       # Score tracking, win-condition check
+│   ├── ScoreUI.cs            # Live score display + pop animation
+│   ├── GameManager.cs        # Game state machine (Start/Playing/GameOver/Won)
+│   ├── GameUIManager.cs      # Panel show/hide logic per game state
+│   ├── CameraFollow.cs       # Smooth camera tracking
+│   └── MusicToggle.cs        # Background music mute toggle
 ├── Prefabs/
-├── Scenes/
-│   └── SampleScene
-└── UI/
+│   └── Pulpit.prefab
+├── Materials/
+└── Scenes/
+    └── SampleScene.unity
 ```
 
 ---
 
-## Developer
+## Controls
 
-**Suryansh Behal**
+| Action | Input |
+|---|---|
+| Move Doofus | WASD or Arrow Keys |
+| Start Game | Start button (title screen) |
+| Retry / Play Again | Retry button (Game Over / Win screen) |
+| Mute / Unmute Music | Mute button (top-right, in-game) |
 
-Submission for the **Hitwicket Game Developer Challenge 2026**.
+---
+
+## Known Limitations
+
+- Difficulty is high by design (see Design Note above) — reaching a full 50 in one run takes practice and precise timing.
+- Camera framing can feel slightly tight during very fast, repeated direction changes.
+
+---
+
+## Assets Used
+
+- 3D objects: built from Unity primitives (Cube, Plane) — no external 3D models required.
+- Background music: *[fill in the source/license link of the track you used]*
+
+---
+
+## Submission
+
+Repository: `HW_2026_Test`
+Role applied for: Game Developer

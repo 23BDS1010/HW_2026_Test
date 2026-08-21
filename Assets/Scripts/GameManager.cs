@@ -5,7 +5,8 @@ public enum GameState
 {
     StartMenu,
     Playing,
-    GameOver
+    GameOver,
+    Won
 }
 
 public class GameManager : MonoBehaviour
@@ -46,10 +47,15 @@ public class GameManager : MonoBehaviour
         ScoreManager.Instance?.ResetScore();
         SetState(GameState.Playing);
     }
+    
 
     public void GameOver()
     {
         SetState(GameState.GameOver);
+    }
+    public void WinGame()
+    {
+        SetState(GameState.Won);
     }
 
     public void RestartGame()

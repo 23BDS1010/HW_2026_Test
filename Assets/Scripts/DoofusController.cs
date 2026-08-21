@@ -17,7 +17,33 @@ public class DoofusController : MonoBehaviour
         {
             speed = ConfigLoader.Instance.Config.player_data.speed;
         }
-        Debug.Log($"[Doofus] Speed = {speed}, FixedDeltaTime = {Time.fixedDeltaTime}");
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnStateChanged += HandleStateChanged;
+            HandleStateChanged(GameManager.Instance.CurrentState); // apply current state immediately
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnStateChanged -= HandleStateChanged;
+        }
+    }
+
+    private void HandleStateChanged(GameState state)
+    {
+        // Freeze Doofus (no gravity/physics) until actual gameplay starts
+        rb.isKinematic = (state != GameState.Playing);
+
+        if (state == GameState.Playing)
+        {
+            // Reset position/velocity right as gameplay begins
+            transform.position = new Vector3(0f, 0.75f, 0f);
+            rb.linearVelocity = Vector3.zero;
+        }
     }
 
     private void FixedUpdate()
@@ -29,6 +55,9 @@ public class DoofusController : MonoBehaviour
         float vertical = Input.GetAxis("Vertical");
 
         Vector3 movement = new Vector3(horizontal, 0f, vertical) * speed * Time.fixedDeltaTime;
+
+        // Cancel any residual horizontal momentum before applying controlled movement
+        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
 
         rb.MovePosition(rb.position + movement);
 

@@ -28,6 +28,11 @@ public class ScoreManager : MonoBehaviour
 
         OnScoreChanged?.Invoke(CurrentScore);
 
+        if (CurrentScore >= 50 && GameManager.Instance != null)
+        {
+            GameManager.Instance.WinGame();
+        }
+
     }
 
     public void ResetScore()
